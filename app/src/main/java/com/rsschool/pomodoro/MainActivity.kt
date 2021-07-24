@@ -1,20 +1,28 @@
 package com.rsschool.pomodoro
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.*
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.rsschool.pomodoro.databinding.ActivityMainBinding
+import kotlinx.coroutines.*
 
-class MainActivity : AppCompatActivity(), PomodoroInterface {
+class MainActivity : AppCompatActivity(), PomodoroInterface, LifecycleObserver {
+
     private lateinit var binding: ActivityMainBinding
 
     private val pomodoroAdapter = PomodoroAdapter(this)
     private val timers = mutableListOf<Timer>()
     private var nextId = 0
 
+    private var startTime = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -87,5 +95,24 @@ class MainActivity : AppCompatActivity(), PomodoroInterface {
         pomodoroAdapter.submitList(newTimers)
         timers.clear()
         timers.addAll(newTimers)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onAppBackgrounded() {
+        val startIntent = Intent(this, ForegroundService::class.java)
+        startIntent.putExtra(COMMAND_ID, COMMAND_START)
+        startIntent.putExtra(STARTED_TIMER_TIME_MS, startTime)
+        startService(startIntent)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onAppForegrounded() {
+        val stopIntent = Intent(this, ForegroundService::class.java)
+        stopIntent.putExtra(COMMAND_ID, COMMAND_STOP)
+        startService(stopIntent)
+    }
+
+    private companion object {
+        private const val INTERVAL = 10L
     }
 }
