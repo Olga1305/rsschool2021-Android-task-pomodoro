@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.lifecycle.*
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.rsschool.pomodoro.databinding.ActivityMainBinding
-import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity(), PomodoroInterface, LifecycleObserver {
 
@@ -112,7 +111,4 @@ class MainActivity : AppCompatActivity(), PomodoroInterface, LifecycleObserver {
         startService(stopIntent)
     }
 
-    private companion object {
-        private const val INTERVAL = 10L
-    }
 }

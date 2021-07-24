@@ -23,16 +23,19 @@ class PomodoroViewHolder (
         binding.timer.text = timer.currentMs.displayTime()
         binding.customView.setCurrent(0L)
         binding.item.setBackgroundColor(resources.getColor(R.color.transparent))
+        binding.startPauseButton.isEnabled = true
 
-        if(timer.isFinished) {
-            binding.startPauseButton.isEnabled = false
-            binding.item.setBackgroundColor(resources.getColor(R.color.pink))
-        }
-
-        if (timer.isStarted) {
-            startTimer(timer)
-        } else {
-            stopTimer(timer)
+        when {
+            timer.isFinished -> {
+                binding.startPauseButton.isEnabled = false
+                binding.item.setBackgroundColor(resources.getColor(R.color.pink))
+            }
+            timer.isStarted -> {
+                startTimer(timer)
+            }
+            else -> {
+                stopTimer(timer)
+            }
         }
 
         initButtonsListeners(timer)
