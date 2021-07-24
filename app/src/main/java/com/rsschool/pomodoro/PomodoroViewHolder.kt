@@ -15,9 +15,15 @@ class PomodoroViewHolder (
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private var countDown: CountDownTimer? = null
+    private var current = 0L
 
     fun bind(timer: Timer) {
         binding.timer.text = timer.currentMs.displayTime()
+
+        if(timer.isFinished) {
+            binding.startPauseButton.isEnabled = false
+            binding.item.setBackgroundColor(resources.getColor(R.color.pink))
+        }
 
         if (timer.isStarted) {
             startTimer(timer)
@@ -31,15 +37,15 @@ class PomodoroViewHolder (
     private fun initButtonsListeners(timer: Timer) {
         binding.startPauseButton.setOnClickListener {
             if (timer.isStarted) {
-                listener.stop(timer.id, timer.currentMs)
+                listener.stop(timer.id, timer.initialValue, timer.currentMs)
             } else {
-                listener.start(timer.id, timer.currentMs)
+                listener.start(timer.id, timer.initialValue, timer.currentMs)
             }
         }
 
-//        binding.restartButton.setOnClickListener { listener.reset(timer.id) }
-
         binding.deleteButton.setOnClickListener { listener.delete(timer.id) }
+
+        binding.customView.setPeriod(timer.initialValue)
     }
 
     private fun startTimer(timer: Timer) {
@@ -51,6 +57,7 @@ class PomodoroViewHolder (
 
         binding.blinkingIndicator.isInvisible = false
         (binding.blinkingIndicator.background as? AnimationDrawable)?.start()
+
     }
 
     private fun stopTimer(timer: Timer) {
@@ -64,23 +71,27 @@ class PomodoroViewHolder (
     }
 
     private fun getCountDownTimer(timer: Timer): CountDownTimer {
-        return object : CountDownTimer(PERIOD, UNIT_SEC) {
+        return object : CountDownTimer(timer.currentMs, UNIT_SEC) {
             val interval = UNIT_SEC
 
             override fun onTick(millisUntilFinished: Long) {
                 timer.currentMs -= interval
+                current += interval
                 binding.timer.text = timer.currentMs.displayTime()
+                binding.customView.setCurrent(timer.initialValue - timer.currentMs)
             }
 
             override fun onFinish() {
                 binding.timer.text = timer.currentMs.displayTime()
+                stopTimer(timer)
+                listener.finish(timer.id, timer.initialValue, timer.currentMs)
             }
         }
     }
 
     private fun Long.displayTime(): String {
         if (this <= 0L) {
-            return START_TIME
+            return STOP_TIME
         }
         val h = this / 1000 / 3600
         val m = this / 1000 % 3600 / 60
@@ -98,9 +109,8 @@ class PomodoroViewHolder (
     }
 
     private companion object {
-
-        private const val START_TIME = "00:00:00"
+        private const val STOP_TIME = "00:00:00"
         private const val UNIT_SEC = 1000L
-        private const val PERIOD = 1000L * 60L * 60L * 24L // Day
+//        private const val PERIOD = 1000L * 60L * 60L * 24L // Day
     }
 }

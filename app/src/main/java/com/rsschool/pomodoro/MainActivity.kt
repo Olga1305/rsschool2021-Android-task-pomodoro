@@ -27,11 +27,11 @@ class MainActivity : AppCompatActivity(), PomodoroInterface {
         binding.addNewTimerButton.setOnClickListener {
             val minutes = binding.timerValue.text.toString()
             if(validateInput(minutes)) {
-                val currentMs = toMilliseconds(minutes)
-                timers.add(Timer(nextId++, currentMs, false))
+                val initialValue = toMilliseconds(minutes)
+                timers.add(Timer(nextId++, initialValue, currentMs = initialValue, isStarted = false, isFinished = false))
                 pomodoroAdapter.submitList(timers.toList())
+                binding.timerValue.text.clear()
             }
-
         }
     }
 
@@ -43,16 +43,16 @@ class MainActivity : AppCompatActivity(), PomodoroInterface {
         } else true
     }
 
-    override fun start(id: Int, currentMs: Long) {
-        changeTimer(id, currentMs, true)
+    override fun start(id: Int, initialValue: Long, currentMs: Long) {
+        changeTimer(id, initialValue, currentMs, isStarted = true, isFinished = false)
     }
 
-    override fun stop(id: Int, currentMs: Long) {
-        changeTimer(id, currentMs, false)
+    override fun stop(id: Int, initialValue: Long, currentMs: Long) {
+        changeTimer(id, initialValue, currentMs, isStarted = false, isFinished = false)
     }
 
-    override fun reset(id: Int) {
-        changeTimer(id, 0L, false)
+    override fun finish(id: Int, initialValue: Long, currentMs: Long) {
+        changeTimer(id, initialValue, currentMs, isStarted = false, isFinished = true)
     }
 
     override fun delete(id: Int) {
@@ -64,11 +64,11 @@ class MainActivity : AppCompatActivity(), PomodoroInterface {
         return minutes.toLong()*60*1000
     }
 
-    private fun changeTimer(id: Int, currentMs: Long?, isStarted: Boolean) {
+    private fun changeTimer(id: Int, initialValue: Long?, currentMs: Long?, isStarted: Boolean, isFinished: Boolean) {
         val newTimers = mutableListOf<Timer>()
         timers.forEach {
             if (it.id == id) {
-                newTimers.add(Timer(it.id, currentMs ?: it.currentMs, isStarted))
+                newTimers.add(Timer(it.id, initialValue ?: it.initialValue, currentMs ?: it.currentMs, isStarted, isFinished))
             } else {
                 newTimers.add(it)
             }
