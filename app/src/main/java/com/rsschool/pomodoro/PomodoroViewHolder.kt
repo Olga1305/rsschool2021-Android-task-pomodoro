@@ -18,6 +18,7 @@ class PomodoroViewHolder (
     private var current = 0L
 
     fun bind(timer: Timer) {
+
         binding.timer.text = timer.currentMs.displayTime()
 
         if(timer.isFinished) {
@@ -82,9 +83,10 @@ class PomodoroViewHolder (
             }
 
             override fun onFinish() {
-                binding.timer.text = timer.currentMs.displayTime()
-                stopTimer(timer)
+//                binding.timer.text = timer.initialValue.displayTime()
                 listener.finish(timer.id, timer.initialValue, timer.currentMs)
+                stopTimer(timer)
+
             }
         }
     }

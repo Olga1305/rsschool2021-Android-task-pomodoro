@@ -36,11 +36,20 @@ class MainActivity : AppCompatActivity(), PomodoroInterface {
     }
 
     private fun validateInput(minutes: String): Boolean {
-        return if (minutes.isEmpty()) {
-            Toast.makeText(this, "The field can not be empty", Toast.LENGTH_SHORT)
-                .show()
-            false
-        } else true
+        val millis = toMilliseconds(minutes)
+        return when {
+            minutes.isEmpty() -> {
+                Toast.makeText(this, "The field can not be empty", Toast.LENGTH_SHORT)
+                    .show()
+                false
+            }
+            millis <= 0 -> {
+                Toast.makeText(this, "The value must be greater than 0", Toast.LENGTH_SHORT)
+                    .show()
+                false
+            }
+            else -> true
+        }
     }
 
     override fun start(id: Int, initialValue: Long, currentMs: Long) {
@@ -69,6 +78,8 @@ class MainActivity : AppCompatActivity(), PomodoroInterface {
         timers.forEach {
             if (it.id == id) {
                 newTimers.add(Timer(it.id, initialValue ?: it.initialValue, currentMs ?: it.currentMs, isStarted, isFinished))
+            } else if (it.id != id && it.isStarted) {
+                newTimers.add(Timer(it.id, it.initialValue, it.currentMs, isStarted = false, it.isFinished))
             } else {
                 newTimers.add(it)
             }
