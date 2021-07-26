@@ -29,6 +29,8 @@ class PomodoroViewHolder (
             timer.isFinished -> {
                 binding.startPauseButton.isEnabled = false
                 binding.item.setBackgroundColor(resources.getColor(R.color.pink))
+                binding.blinkingIndicator.isInvisible = true
+                (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()
             }
             timer.isStarted -> {
                 startTimer(timer)
