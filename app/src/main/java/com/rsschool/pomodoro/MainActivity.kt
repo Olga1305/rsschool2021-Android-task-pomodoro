@@ -43,20 +43,16 @@ class MainActivity : AppCompatActivity(), PomodoroInterface, LifecycleObserver {
     }
 
     private fun validateInput(minutes: String): Boolean {
-        val millis = toMilliseconds(minutes)
-        return when {
-            minutes.isEmpty() -> {
-                Toast.makeText(this, "The field can not be empty", Toast.LENGTH_SHORT)
-                    .show()
-                false
-            }
-            millis <= 0 -> {
-                Toast.makeText(this, "The value must be greater than 0", Toast.LENGTH_SHORT)
-                    .show()
-                false
-            }
-            else -> true
-        }
+
+        return if (minutes.isEmpty()) {
+            Toast.makeText(this, "The field can not be empty", Toast.LENGTH_SHORT)
+                .show()
+            false
+        } else if (toMilliseconds(minutes) <= 0) {
+            Toast.makeText(this, "The value must be greater than 0", Toast.LENGTH_SHORT)
+                .show()
+            false
+        } else true
     }
 
     override fun start(id: Int, initialValue: Long, currentMs: Long) {
